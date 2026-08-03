@@ -5,10 +5,10 @@ Bangalore | +91-9040501650 | beingpawanprasad@outlook.com
 
 ## Skills
 
-- **Programming Languages:** Python, HTML, CSS, JavaScript, Go
+- **Programming Languages:** Python, HTML, CSS, JavaScript
 - **Libraries and Frameworks:** Django, FastAPI, Python Libraries, React, Node.js, Express.js
 - **Tools:** MongoDB, MySQL, PostgreSQL, Git, SQL, NoSQL, GitHub, Linux/Unix, Postman, Grafana, GitHub Actions, Datadog, AWS, REST API, Airflow, TensorFlow, NumPy, Pandas
-- _Currently Learning: Java_
+- _Currently Learning: Java, Springboot, Go_
 
 ## Experience
 
@@ -90,4 +90,4 @@ Bangalore | +91-9040501650 | beingpawanprasad@outlook.com
 
 ### National Institute Of Science And Technology, Odisha | 2019
 
-**BE/B.Tech/BS — Civil Engineering**
+**Bachelor of Technology — Civil Engineering**

@@ -144,15 +144,34 @@ def _styles():
             textColor=COLOR_ACCENT,
             spaceAfter=0,
         ),
-        "bullet": ParagraphStyle(
-            "Bullet",
+        "bullet_glyph": ParagraphStyle(
+            "BulletGlyph",
             fontName="Helvetica",
             fontSize=BODY_FONT_SIZE,
             leading=BODY_LEADING,
             textColor=COLOR_TEXT,
             alignment=TA_LEFT,
-            leftIndent=BULLET_TEXT_INDENT,
-            bulletIndent=BULLET_INDENT,
+            leftIndent=0,
+            spaceAfter=0,
+        ),
+        "bullet_text": ParagraphStyle(
+            "BulletText",
+            fontName="Helvetica",
+            fontSize=BODY_FONT_SIZE,
+            leading=BODY_LEADING,
+            textColor=COLOR_TEXT,
+            alignment=TA_JUSTIFY,
+            leftIndent=0,
+            spaceAfter=0,
+        ),
+        "bullet_text_accent": ParagraphStyle(
+            "BulletTextAccent",
+            fontName="Helvetica",
+            fontSize=BODY_FONT_SIZE,
+            leading=BODY_LEADING,
+            textColor=COLOR_ACCENT,
+            alignment=TA_JUSTIFY,
+            leftIndent=0,
             spaceAfter=0,
         ),
         "body": ParagraphStyle(
@@ -164,29 +183,50 @@ def _styles():
             alignment=TA_JUSTIFY,
             spaceAfter=0,
         ),
-        "company_date_bullet": ParagraphStyle(
-            "CompanyDateBullet",
-            fontName="Helvetica",
-            fontSize=BODY_FONT_SIZE,
-            leading=BODY_LEADING,
-            textColor=COLOR_ACCENT,
-            alignment=TA_LEFT,
-            leftIndent=BULLET_TEXT_INDENT,
-            bulletIndent=BULLET_INDENT,
-            spaceAfter=0,
-        ),
         "list_item": ParagraphStyle(
             "ListItem",
             fontName="Helvetica",
             fontSize=BODY_FONT_SIZE,
             leading=BODY_LEADING,
             textColor=COLOR_TEXT,
-            alignment=TA_LEFT,
-            leftIndent=BULLET_TEXT_INDENT,
-            bulletIndent=BULLET_INDENT,
+            alignment=TA_JUSTIFY,
+            leftIndent=0,
             spaceAfter=0,
         ),
     }
+
+
+def _align_table() -> list:
+    return [
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+        ("TOPPADDING", (0, 0), (-1, -1), 0),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+    ]
+
+
+def _bullet_row(
+    text: str,
+    styles: dict,
+    content_width: float,
+    *,
+    accent: bool = False,
+) -> Table:
+    text_w = content_width - BULLET_TEXT_INDENT
+    text_style = styles["bullet_text_accent"] if accent else styles["bullet_text"]
+    table = Table(
+        [
+            [
+                Paragraph("&bull;", styles["bullet_glyph"]),
+                Paragraph(_inline_md(text, accent=accent), text_style),
+            ]
+        ],
+        colWidths=[BULLET_TEXT_INDENT, text_w],
+        hAlign="LEFT",
+    )
+    table.setStyle(TableStyle(_align_table()))
+    return table
 
 
 def _parse_company_detail_line(text: str) -> dict | None:
@@ -223,12 +263,9 @@ def _date_paragraph(text: str, styles: dict, *, blue_links: bool = False):
 
 
 def _bullet_paragraph(
-    text: str, style: ParagraphStyle, *, accent: bool = False
-) -> Paragraph:
-    return Paragraph(
-        f"<bullet>&bull;</bullet>{_inline_md(text, accent=accent)}",
-        style,
-    )
+    text: str, styles: dict, content_width: float, *, accent: bool = False
+) -> Table:
+    return _bullet_row(text, styles, content_width, accent=accent)
 
 
 def _two_column_table(left_para, right_para, content_width: float) -> Table:
@@ -240,14 +277,10 @@ def _two_column_table(left_para, right_para, content_width: float) -> Table:
     )
     table.setStyle(
         TableStyle(
-            [
-                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+            _align_table()
+            + [
                 ("ALIGN", (0, 0), (0, 0), "LEFT"),
                 ("ALIGN", (1, 0), (1, 0), "RIGHT"),
-                ("LEFTPADDING", (0, 0), (-1, -1), 0),
-                ("RIGHTPADDING", (0, 0), (-1, -1), 0),
-                ("TOPPADDING", (0, 0), (-1, -1), 0),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
             ]
         )
     )
@@ -279,14 +312,31 @@ def _company_date_bullet_row(
     if not parsed:
         return None
 
-    company_para = _bullet_paragraph(
-        parsed["company"],
-        styles["company_date_bullet"] if accent else styles["bullet"],
-        accent=accent,
+    _, date_col = column_widths(content_width)
+    company_w = content_width - BULLET_TEXT_INDENT - date_col
+    text_style = styles["bullet_text_accent"] if accent else styles["bullet_text"]
+    table = Table(
+        [
+            [
+                Paragraph("&bull;", styles["bullet_glyph"]),
+                Paragraph(_inline_md(parsed["company"], accent=accent), text_style),
+                _date_paragraph(parsed["right"], styles),
+            ]
+        ],
+        colWidths=[BULLET_TEXT_INDENT, company_w, date_col],
+        hAlign="LEFT",
     )
-    date_para = _date_paragraph(parsed["right"], styles)
-
-    return [_two_column_table(company_para, date_para, content_width)]
+    table.setStyle(
+        TableStyle(
+            _align_table()
+            + [
+                ("ALIGN", (0, 0), (0, 0), "LEFT"),
+                ("ALIGN", (1, 0), (1, 0), "LEFT"),
+                ("ALIGN", (2, 0), (2, 0), "RIGHT"),
+            ]
+        )
+    )
+    return [table]
 
 
 def _entry_header_row(
@@ -335,8 +385,20 @@ def _rule_flowable(
     )
 
 
-def _list_item_paragraph(item: str, styles: dict):
-    return _bullet_paragraph(item, styles["list_item"])
+def _list_item_paragraph(item: str, styles: dict, content_width: float):
+    text_w = content_width - BULLET_TEXT_INDENT
+    table = Table(
+        [
+            [
+                Paragraph("&bull;", styles["bullet_glyph"]),
+                Paragraph(_inline_md(item), styles["list_item"]),
+            ]
+        ],
+        colWidths=[BULLET_TEXT_INDENT, text_w],
+        hAlign="LEFT",
+    )
+    table.setStyle(TableStyle(_align_table()))
+    return table
 
 
 def build_pdf(resume_data: dict) -> bytes:
@@ -430,13 +492,13 @@ def build_pdf(resume_data: dict) -> bytes:
                     if company_bullet:
                         story.extend(company_bullet)
                     else:
-                        story.append(_bullet_paragraph(bullet, styles["bullet"]))
+                        story.append(_bullet_paragraph(bullet, styles, content_width))
                 if i < len(section["entries"]) - 1:
                     story.append(Spacer(1, ENTRY_GAP))
 
         elif sec_type == "list":
             for item in section.get("items", []):
-                story.append(_list_item_paragraph(item, styles))
+                story.append(_list_item_paragraph(item, styles, content_width))
 
         elif sec_type == "text":
             story.append(

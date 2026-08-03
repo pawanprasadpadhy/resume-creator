@@ -217,7 +217,7 @@ body {
 }
 
 .entry-block {
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .entry-header-row {
@@ -303,7 +303,7 @@ body {
   font-size: 10.5px;
   line-height: 1.4;
   margin-bottom: 1px;
-  text-align: left;
+  text-align: justify;
   padding-left: 2px;
 }
 

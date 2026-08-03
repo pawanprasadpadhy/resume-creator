@@ -10,8 +10,11 @@ resume-creator/
 │   ├── app.py
 │   ├── resume_parser.py
 │   ├── pdf_generator.py
-│   ├── sample_resume.md
+│   ├── pawan_resume.md
 │   └── requirements.txt
+├── docs/
+│   └── reference/
+│       └── Pawan_Prasad_Padhy_Resume.docx   # visual layout reference (2 pages)
 └── frontend/            React (Vite) app
     └── src/
         ├── App.jsx
@@ -56,7 +59,7 @@ Open `http://localhost:5173`. The app talks to the backend at
 
 ## Markdown format
 
-The parser expects this structure (see `backend/sample_resume.md` for a full
+The parser expects this structure (see `backend/pawan_resume.md` for a full
 example):
 
 ```markdown
@@ -105,13 +108,15 @@ Notes:
   for Skills/Certifications).
 - Inline `**bold**` and `*italic*`/`_italic_` are supported everywhere.
 
-## Matching a specific sample resume image
+## Matching the reference resume layout
 
-This project ships with a clean, standard single-column ATS layout. If you
-have a specific resume image/template you want to match exactly, share it
-and the fonts, spacing, section order, and header style in
-`backend/pdf_generator.py` (and the mirrored CSS in
-`frontend/src/index.css`) can be adjusted to replicate it precisely.
+This project loads editable content from `backend/pawan_resume.md` and generates
+an ATS-friendly PDF from that markdown. For the target visual layout (including
+the two-page format), see
+[`docs/reference/Pawan_Prasad_Padhy_Resume.docx`](docs/reference/Pawan_Prasad_Padhy_Resume.docx).
+Fonts, spacing, section order, and header style in `backend/pdf_generator.py`
+(and the mirrored CSS in `frontend/src/index.css`) can be adjusted to replicate
+that document more closely.
 
 ## Why ReportLab (and why this stays ATS-friendly)
 
