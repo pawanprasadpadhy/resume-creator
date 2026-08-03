@@ -1,2 +1,0 @@
-1. Align the right side of the dates and location as per the line ending.
-2. Once a role description is completed, add a single line space between next role heading / project heading.

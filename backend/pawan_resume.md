@@ -7,8 +7,10 @@ Bangalore | +91-9040501650 | beingpawanprasad@outlook.com
 
 - **Programming Languages:** Python, HTML, CSS, JavaScript
 - **Libraries and Frameworks:** Django, FastAPI, Python Libraries, React, Node.js, Express.js
-- **Tools:** MongoDB, MySQL, PostgreSQL, Git, SQL, NoSQL, GitHub, Linux/Unix, Postman, Grafana, GitHub Actions, Datadog, AWS, REST API, Airflow, TensorFlow, NumPy, Pandas
-- _Currently Learning: Java, Springboot, Go_
+- **Databases:** MongoDB, MySQL, PostgreSQL, SQL, NoSQL
+- **Cloud & DevOps:** AWS, Git, GitHub, GitHub Actions, Linux/Unix, Airflow, Datadog, Grafana
+- **Tools:** Postman, REST API, TensorFlow, NumPy, Pandas
+- **Currently Learning**: _Java, Springboot, Go_
 
 ## Experience
 
@@ -80,14 +82,14 @@ Bangalore | +91-9040501650 | beingpawanprasad@outlook.com
 
 ## Education
 
-### Scaler | 2024
+### Scaler | 2022 - 2024
 
 **Specialisation in Software Development**
 
-- Coursework: Data Structures & Algorithms, Object-Oriented Design, SQL, System Design, Full Stack Development.
-- Engineering Practices: Software Design & Documentation, Testing & Debugging, Cross-Functional Collaboration, Multi-Platform Systems (Linux/Unix, AWS, distributed databases).
+- **Coursework**: Data Structures & Algorithms, Object-Oriented Design, SQL, System Design, Full Stack Development.
+- **Engineering Practices**: Software Design & Documentation, Testing & Debugging, Cross-Functional Collaboration, Multi-Platform Systems (Linux/Unix, AWS, distributed databases).
 - Sustained a 900+ day consistent DSA and coding practice streak, reflecting strong problem-solving discipline and command over core CS fundamentals.
 
-### National Institute Of Science And Technology, Odisha | 2019
+### National Institute Of Science And Technology, Odisha | 2015 - 2019
 
 **Bachelor of Technology — Civil Engineering**
