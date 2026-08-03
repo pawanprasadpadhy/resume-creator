@@ -131,9 +131,18 @@ export default function ResumePreview({ markdown }) {
 					const sectionKey = section.heading.toLowerCase();
 					const accentProjectTitles = sectionKey === "projects";
 					const accentCompanyNames = sectionKey === "experience";
+					const sectionBreak = [
+						"skills",
+						"experience",
+						"projects",
+						"education",
+					].includes(sectionKey);
 
 					return (
-						<div key={i} className="resume-section">
+						<div
+							key={i}
+							className={`resume-section${sectionBreak ? " resume-section--break" : ""}`}
+						>
 							<h2 className="section-heading">
 								{section.heading}
 							</h2>

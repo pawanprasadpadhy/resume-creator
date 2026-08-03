@@ -8,20 +8,19 @@ PAGE_MARGIN = 0.32 * inch
 # ReportLab Frame default horizontal padding (must match platypus Frame defaults).
 FRAME_H_PADDING = 6
 CONTENT_WIDTH = letter[0] - 2 * PAGE_MARGIN - 2 * FRAME_H_PADDING
-DATE_COL_MAX = 1.42 * inch
+DATE_COL_MAX = 1.58 * inch
 DATE_COL_RATIO = 0.22
 
 # Bullet layout: glyph at BULLET_INDENT, text + wrapped lines at BULLET_TEXT_INDENT.
 BULLET_INDENT = 6
 BULLET_TEXT_INDENT = 12
 
-# 8pt body fills two pages cleanly; page break before Projects balances the split.
-NAME_FONT_SIZE = 18
-CONTACT_FONT_SIZE = 7.5
-SECTION_FONT_SIZE = 8.5
-ENTRY_TITLE_FONT_SIZE = 8.0
-BODY_FONT_SIZE = 8.0
-BODY_LEADING = 10.0
+NAME_FONT_SIZE = 20
+CONTACT_FONT_SIZE = 8.5
+SECTION_FONT_SIZE = 9.5
+ENTRY_TITLE_FONT_SIZE = 9
+BODY_FONT_SIZE = 9
+BODY_LEADING = 11
 
 HEADER_SPACER = 2
 MAIN_RULE_AFTER = 2
@@ -29,6 +28,8 @@ SECTION_RULE_AFTER = 2
 ENTRY_GAP = BODY_LEADING  # one blank line between roles
 SECTION_END_GAP = 2
 SECTION_SPACE_BEFORE = 5
+SECTION_BREAK_HEADINGS = frozenset({"skills", "experience", "projects", "education"})
+SECTION_BREAK_GAP = 8
 
 PAGE_BREAK_BEFORE = ""
 

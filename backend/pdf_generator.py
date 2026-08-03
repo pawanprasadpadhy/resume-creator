@@ -55,8 +55,16 @@ def _inline_md(
         escaped,
     )
     escaped = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", escaped)
-    escaped = re.sub(r"(?<!\w)\*(.+?)\*(?!\w)", r"<i>\1</i>", escaped)
-    escaped = re.sub(r"(?<!\w)_(.+?)_(?!\w)", r"<i>\1</i>", escaped)
+    escaped = re.sub(
+        r"(?<!\w)\*(.+?)\*(?!\w)",
+        r'<font name="Helvetica-Oblique">\1</font>',
+        escaped,
+    )
+    escaped = re.sub(
+        r"(?<!\w)_(.+?)_(?!\w)",
+        r'<font name="Helvetica-Oblique">\1</font>',
+        escaped,
+    )
     if accent:
         escaped = re.sub(
             r"<b>(.+?)</b>",
@@ -64,6 +72,21 @@ def _inline_md(
             escaped,
         )
     return escaped
+
+
+def _subtitle_html(text: str, *, accent: bool = False) -> str:
+    """Render entry subtitles; non-accent lines match preview italic styling."""
+    html = _inline_md(text, accent=accent)
+    if accent:
+        return html
+    html = re.sub(
+        r"<b>(.+?)</b>",
+        r'<font name="Helvetica-BoldOblique">\1</font>',
+        html,
+    )
+    if "<font" not in html:
+        html = f'<font name="Helvetica-Oblique">{html}</font>'
+    return html
 
 
 def _styles():
@@ -130,7 +153,7 @@ def _styles():
         ),
         "entry_subtitle": ParagraphStyle(
             "EntrySubtitle",
-            fontName="Helvetica",
+            fontName="Helvetica-Oblique",
             fontSize=BODY_FONT_SIZE,
             leading=BODY_LEADING,
             textColor=COLOR_MUTED,
@@ -254,11 +277,18 @@ def _parse_company_date_line(text: str) -> dict | None:
     return _parse_company_detail_line(text)
 
 
+def _is_location(text: str) -> bool:
+    """Heuristic: comma-separated place names (not date ranges or links)."""
+    return "," in text and not re.search(r"\d{4}", text)
+
+
 def _date_paragraph(text: str, styles: dict, *, blue_links: bool = False):
     style_key = "entry_date_link" if blue_links else "entry_date"
     md = _inline_md(text, blue_links=blue_links, link_underline=False)
     if not blue_links:
         md = md.replace(", ", ",&nbsp;")
+        if _is_location(text):
+            md = md.replace(" ", "&nbsp;")
     return Paragraph(md, styles[style_key])
 
 
@@ -297,9 +327,12 @@ def _company_date_row(
     company_style = (
         styles["entry_subtitle_accent"] if accent else styles["entry_subtitle"]
     )
-    company_para = Paragraph(
-        _inline_md(parsed["company"], accent=accent), company_style
+    company_html = (
+        _inline_md(parsed["company"], accent=accent)
+        if accent
+        else _subtitle_html(parsed["company"])
     )
+    company_para = Paragraph(company_html, company_style)
     date_para = _date_paragraph(parsed["right"], styles)
 
     return [_two_column_table(company_para, date_para, content_width)]
@@ -363,7 +396,7 @@ def _entry_header_row(
     flowables = [_two_column_table(title_para, date_para, content_width)]
     if middle:
         flowables.append(
-            Paragraph(_inline_md(", ".join(middle)), styles["entry_subtitle"])
+            Paragraph(_subtitle_html(", ".join(middle)), styles["entry_subtitle"])
         )
     return flowables
 
@@ -478,7 +511,7 @@ def build_pdf(resume_data: dict) -> bytes:
                     else:
                         story.append(
                             Paragraph(
-                                _inline_md(subtitle, accent=accent_companies),
+                                _subtitle_html(subtitle, accent=accent_companies),
                                 styles[subtitle_style_key],
                             )
                         )
@@ -506,6 +539,8 @@ def build_pdf(resume_data: dict) -> bytes:
             )
 
         story.append(Spacer(1, SECTION_END_GAP))
+        if (section.get("heading") or "").lower() in SECTION_BREAK_HEADINGS:
+            story.append(Spacer(1, SECTION_BREAK_GAP))
 
     doc.build(story)
     pdf_bytes = buffer.getvalue()
