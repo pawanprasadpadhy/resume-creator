@@ -5,7 +5,7 @@ Flask backend for the Resume Creator project.
 
 Endpoints:
   GET  /api/health          -> simple health check
-  GET  /api/sample          -> returns the default sample_resume.md content
+  GET  /api/sample          -> returns the default pawan_resume.md content
   POST /api/generate-pdf    -> body: { "markdown": "..." }
                                 returns: application/pdf binary
 
@@ -14,19 +14,19 @@ Run:
   (listens on http://localhost:5001)
 """
 
-import os
-from flask import Flask, request, jsonify, send_file, Response
-from flask_cors import CORS
 import io
+import os
 
-from resume_parser import parse_resume_markdown
+from flask import Flask, Response, jsonify, request, send_file
+from flask_cors import CORS
 from pdf_generator import build_pdf
+from resume_parser import parse_resume_markdown
 
 app = Flask(__name__)
 CORS(app)  # allow the Vite dev server (different port) to call this API
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-SAMPLE_PATH = os.path.join(BASE_DIR, "sample_resume.md")
+DEFAULT_RESUME_PATH = os.path.join(BASE_DIR, "pawan_resume.md")
 
 
 @app.get("/api/health")
@@ -36,7 +36,7 @@ def health():
 
 @app.get("/api/sample")
 def sample():
-    with open(SAMPLE_PATH, "r", encoding="utf-8") as f:
+    with open(DEFAULT_RESUME_PATH, "r", encoding="utf-8") as f:
         content = f.read()
     return jsonify({"markdown": content})
 

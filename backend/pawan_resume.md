@@ -14,7 +14,7 @@ Bangalore | +91-9040501650 | beingpawanprasad@outlook.com
 
 ### Software Engineer | Nov 2025 - Present
 
-**Recro (Client: Allen Digital)**
+**Recro (Client: Allen Digital)** | Bangalore, Karnataka, India
 
 - Automated exam state transition workflows and resolved exam IDs stuck across multiple failure states, reducing manual intervention required for exam delivery operations.
 - Debugged and resolved issues in existing Go services, gaining working proficiency in a statically-typed, concurrent-first language alongside Python.
@@ -31,7 +31,7 @@ Bangalore | +91-9040501650 | beingpawanprasad@outlook.com
 
 ### Software Developer Engineer | Nov 2024 - Nov 2025
 
-**MountBlue Technologies Pvt. Ltd.**
+**MountBlue Technologies Pvt. Ltd.** | Bangalore, Karnataka, India
 
 - Designed normalized PostgreSQL schemas and indexing strategies for document metadata storage, applying database optimization principles to improve query performance and support compliance-driven data archiving.
 - Developed and tested web applications, APIs, and automation scripts using Django and FastAPI, establishing CI/CD pipelines with GitHub Actions across multiple repositories.
@@ -44,12 +44,23 @@ Bangalore | +91-9040501650 | beingpawanprasad@outlook.com
 - Tested and validated RESTful API endpoints using Postman, building comprehensive test collections for the 'Rex' and 'AutoTag' services to strengthen error handling coverage.
 - Wrote clean, maintainable code with structured logging and documentation across the AutoTag and Rex pipelines, supporting long-term maintainability and handover.
 
+### Civil Engineer
+
+- **Grasim Industries Pvt. Ltd. | Feb 2022 - Sep 2022**
+- **Er. Surendra Kumar Panigrahi (A Class Contractor) | July 2019 - Oct 2021**
+
 ## Projects
 
 ### Portfolio Website | [Live Demo](https://pawanprasad-portfolio.netlify.app/)
 
 - Built a full-stack portfolio application using the MERN stack, with a responsive React frontend, dynamic routing, and RESTful Express.js APIs for contact form submissions and content management, backed by MongoDB for persistent storage.
 - _Tech Stack (MERN): React.js, Node.js, Express.js, MongoDB, JavaScript, HTML5, CSS3, REST APIs._
+
+### Resume Creator | [GitHub](https://github.com/pawanprasadpadhy/resume-creator)
+
+- Built a markdown-based resume editor with a live preview and one-click ATS-friendly PDF export, using a React (Vite) frontend and a Flask backend with ReportLab for server-side PDF generation.
+- Implemented a shared markdown parser on both client and server so the browser preview stays in sync with the generated PDF, including bold/italic formatting, links, and multi-page layout.
+- _Tech Stack: React, Vite, Flask, ReportLab, Python, JavaScript, Markdown._
 
 ### Trello Clone Application | [Live Demo](https://trello-clone-ppp.netlify.app/)
 

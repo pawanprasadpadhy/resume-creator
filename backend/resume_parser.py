@@ -30,7 +30,7 @@ def parse_resume_markdown(markdown_text: str) -> dict:
     lines = markdown_text.replace("\r\n", "\n").split("\n")
 
     name = ""
-    contact = ""
+    contact_lines = []
     sections = []
 
     current_section = None  # {"heading": str, "raw_lines": [...]}
@@ -53,12 +53,9 @@ def parse_resume_markdown(markdown_text: str) -> dict:
             continue
 
         if current_section is None and not stripped.startswith("#"):
-            # Lines between the name and the first "## " section are the contact line
+            # Lines between the name and the first "## " section are contact lines
             if stripped:
-                if contact:
-                    contact += " " + stripped
-                else:
-                    contact = stripped
+                contact_lines.append(stripped)
             continue
 
         if current_section is not None:
@@ -67,7 +64,12 @@ def parse_resume_markdown(markdown_text: str) -> dict:
     if current_section is not None:
         sections.append(_finalize_section(current_section))
 
-    return {"name": name, "contact": contact, "sections": sections}
+    return {
+        "name": name,
+        "contact": " ".join(contact_lines),
+        "contact_lines": contact_lines,
+        "sections": sections,
+    }
 
 
 def _finalize_section(section: dict) -> dict:
@@ -102,12 +104,14 @@ def _extract_entries(raw_lines):
             current = {
                 "header_raw": header_raw,
                 "parts": [p.strip() for p in header_raw.split("|")],
+                "subtitles": [],
                 "bullets": [],
             }
         elif stripped.startswith("- ") or stripped.startswith("* "):
             if current is not None:
                 current["bullets"].append(stripped[2:].strip())
-        # ignore blank lines / stray text inside entries sections
+        elif stripped and current is not None:
+            current["subtitles"].append(stripped)
 
     if current is not None:
         entries.append(current)
@@ -128,7 +132,7 @@ if __name__ == "__main__":
     import json
     import sys
 
-    path = sys.argv[1] if len(sys.argv) > 1 else "sample_resume.md"
+    path = sys.argv[1] if len(sys.argv) > 1 else "pawan_resume.md"
     with open(path, "r", encoding="utf-8") as f:
         text = f.read()
     print(json.dumps(parse_resume_markdown(text), indent=2))
