@@ -61,9 +61,9 @@ Bangalore | +91-9040501650 | beingpawanprasad@outlook.com
 
 ### Resume Creator | [GitHub](https://github.com/pawanprasadpadhy/resume-creator)
 
-- Built a markdown-based resume editor with a live preview and one-click ATS-friendly PDF export, using a React (Vite) frontend and a Flask backend with ReportLab for server-side PDF generation.
-- Implemented a shared markdown parser on both client and server so the browser preview stays in sync with the generated PDF, including bold/italic formatting, links, and multi-page layout.
-- _Tech Stack: React, Vite, Flask, ReportLab, Python, JavaScript, Markdown._
+- Built a full-stack markdown resume editor with a live preview and one-click ATS-friendly PDF export, using a React (Vite) frontend and a Flask/ReportLab API, configured for production on Netlify and Render with Gunicorn.
+- Implemented a shared client/server markdown parser that keeps the preview in sync with the PDF (formatting, links, manual page breaks), plus access-key-protected private resumes, env-based CORS, and drag-and-drop uploads stored in the browser.
+- _Tech Stack: React, Vite, Flask, ReportLab, Python, JavaScript, Gunicorn, Netlify, Render._
 
 ### Olist E-Commerce Analytics | [GitHub](https://github.com/pawanprasadpadhy/ecommerce-analysis)
 
