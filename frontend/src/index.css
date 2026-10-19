@@ -45,6 +45,28 @@ body {
   gap: 8px;
 }
 
+.resume-select {
+  background: #333a4a;
+  color: #e4e6eb;
+  border: 1px solid #454e63;
+  border-radius: 6px;
+  padding: 7px 10px;
+  font-size: 13px;
+  font-weight: 500;
+  min-width: 180px;
+  max-width: 260px;
+  cursor: pointer;
+}
+
+.resume-select:hover {
+  background: #454e63;
+}
+
+.resume-select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .btn {
   border: none;
   border-radius: 6px;
