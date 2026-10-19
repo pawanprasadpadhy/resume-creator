@@ -33,6 +33,9 @@ frontend/dist/
 frontend/.vite/
 
 # --- Environment & secrets ---
+# Personal resumes: kept out of git, uploaded to Render as Secret Files
+backend/private_resumes/*
+!backend/private_resumes/README.md
 .env
 .env.*
 !.env.example

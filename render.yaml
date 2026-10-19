@@ -15,9 +15,10 @@ services:
       # https://resume-creator-ppp.netlify.app,http://localhost:5173
       - key: ALLOWED_ORIGINS
         sync: false
-      # Only these files are served without the access key (the public site).
-      - key: PUBLIC_RESUMES
-        value: sample_resume.md
+      # Private resumes are uploaded as Secret Files (Environment -> Secret
+      # Files), which Render mounts here. backend/public_resumes is public.
+      - key: PRIVATE_RESUMES_DIR
+        value: /etc/secrets
       # Long random secret that unlocks every resume (the personal site), e.g.
       # python -c "import secrets; print(secrets.token_urlsafe(32))"
       - key: OWNER_ACCESS_KEY

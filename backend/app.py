@@ -22,12 +22,17 @@ Run (production):
 Environment:
   ALLOWED_ORIGINS   comma-separated origins allowed to call the API
                     (default: http://localhost:5173)
-  PUBLIC_RESUMES    comma-separated .md files anyone can load
-                    (default: sample_resume.md)
-  OWNER_ACCESS_KEY  secret that unlocks every bundled resume when sent as the
-                    X-Access-Key header. Unset -> only PUBLIC_RESUMES are
+  PRIVATE_RESUMES_DIR  folder of private .md resumes (default:
+                    backend/private_resumes, which is git-ignored). On Render,
+                    upload them as Secret Files and set this to /etc/secrets.
+  DEFAULT_RESUME    private resume to open first for the owner
+                    (default: resume_mastercard_da.md)
+  OWNER_ACCESS_KEY  secret that unlocks the private resumes when sent as the
+                    X-Access-Key header. Unset -> only public resumes are
                     served, except under `python app.py` (debug), where the
                     local developer is treated as the owner.
+
+Resumes in backend/public_resumes (committed) are visible to everyone.
 """
 
 import hmac
@@ -50,13 +55,11 @@ ALLOWED_ORIGINS = [
 CORS(app, resources={r"/api/*": {"origins": ALLOWED_ORIGINS}})
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DEFAULT_RESUME_FILE = "resume_mastercard_da.md"
-
-PUBLIC_RESUMES = [
-    f.strip()
-    for f in os.environ.get("PUBLIC_RESUMES", "sample_resume.md").split(",")
-    if f.strip()
-]
+PUBLIC_RESUMES_DIR = os.path.join(BASE_DIR, "public_resumes")
+PRIVATE_RESUMES_DIR = os.environ.get(
+    "PRIVATE_RESUMES_DIR", os.path.join(BASE_DIR, "private_resumes")
+)
+DEFAULT_RESUME_FILE = os.environ.get("DEFAULT_RESUME", "resume_mastercard_da.md")
 OWNER_ACCESS_KEY = os.environ.get("OWNER_ACCESS_KEY", "")
 
 
@@ -67,15 +70,31 @@ def _is_owner() -> bool:
     return hmac.compare_digest(provided.encode(), OWNER_ACCESS_KEY.encode())
 
 
-def _bundled_resume_files():
-    return sorted(f for f in os.listdir(BASE_DIR) if f.endswith(".md"))
+def _md_files(directory):
+    """{filename: path} for the .md files in directory ({} if it is missing)."""
+    if not os.path.isdir(directory):
+        return {}
+    return {
+        f: os.path.join(directory, f)
+        for f in os.listdir(directory)
+        if f.endswith(".md")
+        and f.lower() != "readme.md"
+        and os.path.isfile(os.path.join(directory, f))
+    }
 
 
-def _visible_resume_files():
-    files = _bundled_resume_files()
+def _visible_resumes():
+    """{filename: path} the caller may load, sorted by name. A private resume
+    with the same name as a public one takes precedence for the owner."""
+    resumes = _md_files(PUBLIC_RESUMES_DIR)
     if _is_owner():
-        return files
-    return [f for f in files if f in PUBLIC_RESUMES]
+        resumes.update(_md_files(PRIVATE_RESUMES_DIR))
+    return dict(sorted(resumes.items()))
+
+
+def _read(path):
+    with open(path, "r", encoding="utf-8") as f:
+        return f.read()
 
 
 def _default_resume_file(files):
@@ -98,12 +117,11 @@ def health():
 
 @app.get("/api/sample")
 def sample():
-    filename = _default_resume_file(_visible_resume_files())
+    resumes = _visible_resumes()
+    filename = _default_resume_file(list(resumes))
     if not filename:
         return jsonify({"error": "no resumes available"}), 404
-    with open(os.path.join(BASE_DIR, filename), "r", encoding="utf-8") as f:
-        content = f.read()
-    return jsonify({"markdown": content})
+    return jsonify({"markdown": _read(resumes[filename])})
 
 
 @app.get("/api/access")
@@ -113,7 +131,7 @@ def access():
 
 @app.get("/api/resumes")
 def list_resumes():
-    files = _visible_resume_files()
+    files = list(_visible_resumes())
     return jsonify(
         {
             "resumes": [{"file": f, "label": _resume_label(f)} for f in files],
@@ -125,12 +143,11 @@ def list_resumes():
 @app.get("/api/resumes/<filename>")
 def get_resume(filename):
     # Only serve names from the visible listing: this keeps private resumes
-    # private and stops the URL escaping BASE_DIR.
-    if filename not in _visible_resume_files():
+    # private and stops the URL escaping the resume folders.
+    path = _visible_resumes().get(filename)
+    if not path:
         return jsonify({"error": "resume not found"}), 404
-    with open(os.path.join(BASE_DIR, filename), "r", encoding="utf-8") as f:
-        content = f.read()
-    return jsonify({"file": filename, "markdown": content})
+    return jsonify({"file": filename, "markdown": _read(path)})
 
 
 @app.post("/api/generate-pdf")

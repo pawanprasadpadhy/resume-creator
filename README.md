@@ -10,7 +10,8 @@ resume-creator/
 │   ├── app.py
 │   ├── resume_parser.py
 │   ├── pdf_generator.py
-│   ├── pawan_resume.md
+│   ├── public_resumes/     resumes anyone can load (committed)
+│   ├── private_resumes/    your resumes (git-ignored, owner only)
 │   └── requirements.txt
 ├── docs/
 │   └── reference/
@@ -51,7 +52,7 @@ Open `http://localhost:5173`. The app talks to the backend at
 
 ## 3. Use it
 
-1. Edit the markdown on the left (or **Import .md** an existing file).
+1. Pick a resume from the dropdown, or **Upload** (or drag in) a `.md` file.
 2. Watch the live preview update on the right as you type.
 3. Click **Render / Generate PDF** — the backend parses your markdown,
    renders it with ReportLab, and downloads `resume.pdf`.
@@ -63,12 +64,15 @@ Production runs as **one backend and two frontends** from this repo:
 
 | Site     | Netlify env            | Dropdown shows                                      |
 | -------- | ---------------------- | --------------------------------------------------- |
-| Public   | `VITE_APP_MODE=public` | Only `PUBLIC_RESUMES` (the sample)                  |
-| Personal | `VITE_APP_MODE=owner`  | Every bundled resume, after entering the access key |
+| Public   | `VITE_APP_MODE=public` | Only `backend/public_resumes/` (the sample)         |
+| Personal | `VITE_APP_MODE=owner`  | Public + private resumes, after entering the access key |
 
-The backend only returns private resumes when the request carries the
-`X-Access-Key` header matching `OWNER_ACCESS_KEY`, so the public site (or
-anyone calling the API directly) can never load them.
+Private resumes are never committed: `backend/private_resumes/` is git-ignored,
+and in production they are uploaded to Render as **Secret Files** (Environment →
+Secret Files, same filenames), which Render mounts at `/etc/secrets`. The
+backend only returns them when the request carries the `X-Access-Key` header
+matching `OWNER_ACCESS_KEY`, so the public site (or anyone calling the API
+directly) can never load them.
 
 **Backend on Render** — `render.yaml` describes the service (New → Blueprint), or
 create a Web Service manually with:
@@ -80,7 +84,7 @@ create a Web Service manually with:
 - Env:
     - `PYTHON_VERSION=3.12.7`
     - `ALLOWED_ORIGINS=https://<public-site>.netlify.app,https://<personal-site>.netlify.app`
-    - `PUBLIC_RESUMES=sample_resume.md`
+    - `PRIVATE_RESUMES_DIR=/etc/secrets`
     - `OWNER_ACCESS_KEY=<long random secret>`
 
 **Frontend on Netlify** — create two sites from the same repo; `netlify.toml`
@@ -98,8 +102,8 @@ able to call the API.
 
 ## Markdown format
 
-The parser expects this structure (see `backend/pawan_resume.md` for a full
-example):
+The parser expects this structure (see `backend/public_resumes/sample_resume.md`
+for a full example):
 
 ```markdown
 # Your Full Name
@@ -149,7 +153,7 @@ Notes:
 
 ## Matching the reference resume layout
 
-This project loads editable content from `backend/pawan_resume.md` and generates
+This project loads editable content from the resumes in `backend/` and generates
 an ATS-friendly PDF from that markdown. For the target visual layout (including
 the two-page format), see
 [`docs/reference/Pawan_Prasad_Padhy_Resume.docx`](docs/reference/Pawan_Prasad_Padhy_Resume.docx).
