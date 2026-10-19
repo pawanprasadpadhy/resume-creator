@@ -312,6 +312,7 @@ select {
 }
 
 .preview-scroll {
+  position: relative;
   flex: 1;
   overflow: auto;
   padding-bottom: 32px;
@@ -693,204 +694,162 @@ select {
   }
 }
 
-/* ---------- Resume preview (mirrors the PDF layout) ---------- */
+/* ---------- Resume preview: real pages that mirror the PDF ----------
+   Sizes are in pt and copied from backend/constants.py and the ParagraphStyles
+   in backend/pdf_generator.py (font size / leading), so blocks have the same
+   heights as their PDF flowables and pages break in the same places. */
 
-.resume-paper {
-  --date-col-width: 1.58in;
-
-  background-color: #fff;
-  background-image: repeating-linear-gradient(to bottom,
-      #ffffff 0,
-      #ffffff calc(11in - 10px),
-      var(--canvas) calc(11in - 10px),
-      var(--canvas) 11in);
-  background-attachment: local;
-  margin: 24px auto;
-  padding: 0.32in;
-  width: 8.5in;
-  max-width: calc(100% - 48px);
-  min-height: auto;
-  box-shadow: var(--paper-shadow);
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  color: #1a1a1a;
+/* width: max-content + auto margins centres the pages, but unlike flex
+   centring an over-wide page overflows to the right, where it can be scrolled
+   to, instead of being clipped on the left. */
+.pdf-pages {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: max-content;
+  margin: 0 auto;
+  padding: 24px 16px 8px;
 }
 
-.resume-name {
-  text-align: center;
-  font-size: 25px;
-  font-weight: 700;
-  margin: 0 0 2px;
-}
-
-.resume-contact {
-  text-align: center;
-  font-size: 11.5px;
-  color: #444;
-  margin: 0 0 10px;
-}
-
-.resume-contact-line {
-  margin: 0 0 2px;
-}
-
-.resume-contact a {
-  color: #2563eb;
-  text-decoration: underline;
-}
-
-.resume-paper a {
-  color: #1a1a1a;
-  text-decoration: underline;
-}
-
-.rule-heavy {
-  border: none;
-  border-top: 1.5px solid #333;
-  margin: 6px 0 10px;
-}
-
-.rule-light {
-  border: none;
-  border-top: 0.8px solid #333;
-  margin: 2px 0 8px;
-}
-
-.resume-section {
-  margin-bottom: 4px;
-}
-
-.resume-section--break {
-  margin-bottom: 12px;
-}
-
-.section-heading {
-  font-size: 12.5px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  margin: 6px 0 1px;
-}
-
-.entry-block {
-  margin-bottom: 10px;
-}
-
-/* Preview-only hint for a <!-- pagebreak --> marker; the PDF starts a new page here. */
-.page-break {
+.pdf-page {
   position: relative;
-  border-top: 1px dashed #9ca3af;
-  margin: 14px 0 10px;
-}
-
-.page-break::after {
-  content: "page break";
-  position: absolute;
-  top: -7px;
-  right: 0;
-  padding-left: 6px;
+  flex-shrink: 0;
+  width: 8.5in;
+  height: 11in;
+  padding: calc(0.32in + 6pt); /* PAGE_MARGIN + ReportLab frame padding */
   background: #fff;
-  color: #9ca3af;
-  font-size: 9px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  box-shadow: var(--paper-shadow);
 }
 
-.entry-header-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) var(--date-col-width);
-  align-items: baseline;
-  column-gap: 0;
-  width: 100%;
+.pdf-page-number {
+  position: absolute;
+  right: 0;
+  bottom: -20px;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  color: var(--text-muted);
 }
 
-.entry-company-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) var(--date-col-width);
-  align-items: baseline;
-  column-gap: 0;
-  width: 100%;
-  margin: 1px 0 3px;
+.pdf-frame {
+  --date-col: 1.58in; /* min(DATE_COL_MAX, width * DATE_COL_RATIO) */
+  width: calc(8.5in - 2 * (0.32in + 6pt));
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 9pt;
+  line-height: 11pt;
+  color: #1a1a1a;
 }
 
-.entry-title {
+/* Zero-size, clipped wrapper so the measuring copy never affects scrolling. */
+.pdf-measure-wrap {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.pdf-frame a {
+  color: #1a1a1a;
+  text-decoration: underline;
+}
+
+.pdf-name {
+  font-size: 20pt;
+  line-height: 21.5pt;
   font-weight: 700;
-  font-size: 12.5px;
+  text-align: center;
+  padding-bottom: 1pt;
 }
 
-.entry-date {
-  font-size: 11px;
+.pdf-contact {
+  font-size: 8.5pt;
+  line-height: 11pt;
   color: #444;
-  text-align: right;
-  justify-self: stretch;
+  text-align: center;
 }
 
-.entry-title--accent {
+.pdf-contact a {
   color: #2563eb;
 }
 
-.entry-subtitle--accent {
-  color: #2563eb;
+.pdf-rule {
+  padding: 1pt 0 2pt;
 }
 
-.entry-subtitle--accent b {
-  color: #2563eb;
+.pdf-rule::before {
+  content: "";
+  display: block;
+  border-top: 0.5pt solid #333;
 }
 
-.entry-company-name {
-  font-size: 11px;
-  font-style: normal;
-  color: #444;
+.pdf-rule--heavy::before {
+  border-top-width: 0.8pt;
 }
 
-.entry-company-name.entry-subtitle--accent,
-.entry-company-name.entry-subtitle--accent b {
-  color: #2563eb;
+.pdf-heading {
+  font-size: 9.5pt;
+  line-height: 10.8pt;
+  font-weight: 700;
+  letter-spacing: 0.6pt;
+  text-transform: uppercase;
 }
 
-.company-date-bullet {
-  list-style-type: disc;
-  list-style-position: outside;
-  text-align: left;
-}
-
-.company-date-bullet .entry-company-row {
+.pdf-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) var(--date-col-width);
-  margin-left: -14px;
-  width: calc(100% + 14px);
+  grid-template-columns: minmax(0, 1fr) var(--date-col);
+  align-items: start;
 }
 
-.entry-subtitle {
-  font-style: italic;
-  font-size: 11px;
+.pdf-title {
+  font-weight: 700;
+  line-height: 10pt;
+}
+
+.pdf-accent-text,
+.pdf-accent,
+.pdf-accent b {
+  color: #2563eb;
+}
+
+.pdf-date {
+  text-align: right;
   color: #444;
-  margin: 1px 0 3px;
 }
 
-.bullet-list {
-  margin: 2px 0 0;
-  padding-left: 14px;
-  list-style-type: disc;
-  list-style-position: outside;
+.pdf-date a {
+  color: #1a1a1a;
+  text-decoration: none;
 }
 
-.bullet-list li {
-  font-size: 11.5px;
-  line-height: 1.4;
-  margin-bottom: 1px;
-  text-align: justify;
-  padding-left: 2px;
+.pdf-date--link,
+.pdf-date--link a {
+  color: #2563eb;
 }
 
-.section-text {
-  font-size: 11px;
-  line-height: 1.35;
-  margin: 2px 0;
+.pdf-subtitle {
+  font-style: italic;
+  color: #444;
+}
+
+.pdf-bullet {
+  display: grid;
+  grid-template-columns: 12pt minmax(0, 1fr); /* BULLET_TEXT_INDENT */
+  align-items: start;
+}
+
+.pdf-bullet--dated {
+  grid-template-columns: 12pt minmax(0, 1fr) var(--date-col);
+}
+
+.pdf-text {
   text-align: justify;
 }
 
 .preview-empty {
-  color: #8a8f9a;
+  color: var(--text-muted);
   font-style: italic;
   margin-top: 40px;
   text-align: center;
