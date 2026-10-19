@@ -5,7 +5,9 @@ Flask backend for the Resume Creator project.
 
 Endpoints:
   GET  /api/health          -> simple health check
-  GET  /api/sample          -> returns the default pawan_resume.md content
+  GET  /api/sample          -> returns the default resume's markdown
+  GET  /api/resumes         -> lists the bundled .md resumes in this folder
+  GET  /api/resumes/<file>  -> returns one bundled resume's markdown
   POST /api/generate-pdf    -> body: { "markdown": "..." }
                                 returns: application/pdf binary
 
@@ -40,7 +42,19 @@ ALLOWED_ORIGINS = [
 CORS(app, resources={r"/api/*": {"origins": ALLOWED_ORIGINS}})
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DEFAULT_RESUME_PATH = os.path.join(BASE_DIR, "resume_mastercard_da.md")
+DEFAULT_RESUME_FILE = "resume_mastercard_da.md"
+DEFAULT_RESUME_PATH = os.path.join(BASE_DIR, DEFAULT_RESUME_FILE)
+
+
+def _bundled_resume_files():
+    return sorted(f for f in os.listdir(BASE_DIR) if f.endswith(".md"))
+
+
+def _resume_label(filename: str) -> str:
+    """resume_mastercard_da.md -> "Mastercard DA", pawan_resume.md -> "Pawan"."""
+    stem = filename[: -len(".md")]
+    words = [w for w in stem.split("_") if w and w.lower() != "resume"] or [stem]
+    return " ".join(w.upper() if len(w) <= 2 else w.capitalize() for w in words)
 
 
 @app.get("/api/health")
@@ -53,6 +67,27 @@ def sample():
     with open(DEFAULT_RESUME_PATH, "r", encoding="utf-8") as f:
         content = f.read()
     return jsonify({"markdown": content})
+
+
+@app.get("/api/resumes")
+def list_resumes():
+    files = _bundled_resume_files()
+    return jsonify(
+        {
+            "resumes": [{"file": f, "label": _resume_label(f)} for f in files],
+            "default": DEFAULT_RESUME_FILE if DEFAULT_RESUME_FILE in files else None,
+        }
+    )
+
+
+@app.get("/api/resumes/<filename>")
+def get_resume(filename):
+    # Only serve names from the directory listing, so the URL can't escape BASE_DIR.
+    if filename not in _bundled_resume_files():
+        return jsonify({"error": "resume not found"}), 404
+    with open(os.path.join(BASE_DIR, filename), "r", encoding="utf-8") as f:
+        content = f.read()
+    return jsonify({"file": filename, "markdown": content})
 
 
 @app.post("/api/generate-pdf")
