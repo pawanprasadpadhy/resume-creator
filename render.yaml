@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: resume-creator-api
+    runtime: python
+    rootDir: backend
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 60
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      # Set in the Render dashboard to your Netlify URL, e.g.
+      # https://resume-creator-ppp.netlify.app,http://localhost:5173
+      - key: ALLOWED_ORIGINS
+        sync: false

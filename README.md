@@ -57,6 +57,26 @@ Open `http://localhost:5173`. The app talks to the backend at
    renders it with ReportLab, and downloads `resume.pdf`.
 4. **Export .md** any time to save your raw markdown source.
 
+## 4. Deploy (Render + Netlify)
+
+**Backend on Render** — `render.yaml` describes the service (New → Blueprint), or
+create a Web Service manually with:
+
+- Root Directory: `backend`
+- Build Command: `pip install -r requirements.txt`
+- Start Command: `gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 60`
+- Health Check Path: `/api/health`
+- Env: `PYTHON_VERSION=3.12.7`, `ALLOWED_ORIGINS=https://<your-site>.netlify.app`
+
+**Frontend on Netlify** — `netlify.toml` sets the base directory, build command
+and publish folder. Add one environment variable before the first deploy:
+
+- `VITE_API_BASE=https://<your-service>.onrender.com` (no trailing slash)
+
+Vite bakes `VITE_API_BASE` into the build, so redeploy after changing it.
+`ALLOWED_ORIGINS` is comma-separated; add every frontend origin that should be
+able to call the API.
+
 ## Markdown format
 
 The parser expects this structure (see `backend/pawan_resume.md` for a full
