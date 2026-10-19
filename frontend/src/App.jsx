@@ -3,7 +3,7 @@ import MarkdownEditor from "./components/MarkdownEditor.jsx";
 import ResumePreview from "./components/ResumePreview.jsx";
 import Toolbar from "./components/Toolbar.jsx";
 
-const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5001";
+const API_BASE = (import.meta.env.VITE_API_BASE || "http://localhost:5001").replace(/\/+$/, "");
 
 const FALLBACK_SAMPLE = `# Your Name
 you@email.com | (555) 123-4567 | City, State | linkedin.com/in/you
@@ -89,9 +89,11 @@ export default function App() {
       a.click();
       URL.revokeObjectURL(url);
     } catch (err) {
+      // fetch() rejects with a TypeError on network failures; the message
+      // differs per browser ("Failed to fetch", "Load failed", ...).
       setError(
-        err.message?.includes("fetch")
-          ? "Could not reach the backend. Is it running on http://localhost:5001?"
+        err instanceof TypeError
+          ? "Could not reach the server. It may be waking up, please try again in a few seconds."
           : err.message
       );
     } finally {
