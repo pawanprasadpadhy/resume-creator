@@ -9,9 +9,16 @@ Endpoints:
   POST /api/generate-pdf    -> body: { "markdown": "..." }
                                 returns: application/pdf binary
 
-Run:
+Run (local):
   python app.py
   (listens on http://localhost:5001)
+
+Run (production):
+  gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 60
+
+Environment:
+  ALLOWED_ORIGINS   comma-separated origins allowed to call the API
+                    (default: http://localhost:5173)
 """
 
 import io
@@ -23,10 +30,17 @@ from pdf_generator import build_pdf
 from resume_parser import parse_resume_markdown
 
 app = Flask(__name__)
-CORS(app)  # allow the Vite dev server (different port) to call this API
+app.config["MAX_CONTENT_LENGTH"] = 1 * 1024 * 1024  # reject request bodies over 1 MB
+
+ALLOWED_ORIGINS = [
+    o.strip().rstrip("/")
+    for o in os.environ.get("ALLOWED_ORIGINS", "http://localhost:5173").split(",")
+    if o.strip()
+]
+CORS(app, resources={r"/api/*": {"origins": ALLOWED_ORIGINS}})
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DEFAULT_RESUME_PATH = os.path.join(BASE_DIR, "pawan_resume.md")
+DEFAULT_RESUME_PATH = os.path.join(BASE_DIR, "resume_mastercard_da.md")
 
 
 @app.get("/api/health")
@@ -52,8 +66,12 @@ def generate_pdf():
     try:
         resume_data = parse_resume_markdown(markdown_text)
         pdf_bytes = build_pdf(resume_data)
-    except Exception as exc:  # noqa: BLE001 - surface parse/render errors to the UI
-        return jsonify({"error": f"Failed to generate PDF: {exc}"}), 500
+    except Exception:  # noqa: BLE001 - log details, return a generic message
+        app.logger.exception("PDF generation failed")
+        return (
+            jsonify({"error": "Failed to generate PDF. Check the markdown format."}),
+            500,
+        )
 
     return send_file(
         io.BytesIO(pdf_bytes),
@@ -61,6 +79,11 @@ def generate_pdf():
         as_attachment=True,
         download_name="resume.pdf",
     )
+
+
+@app.errorhandler(413)
+def payload_too_large(_err):
+    return jsonify({"error": "Resume is too large (max 1 MB)."}), 413
 
 
 if __name__ == "__main__":
