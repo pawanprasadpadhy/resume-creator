@@ -468,7 +468,7 @@ def build_pdf(resume_data: dict) -> bytes:
     )
 
     for section in resume_data.get("sections", []):
-        if (
+        if section.get("page_break_before") or (
             PAGE_BREAK_BEFORE
             and (section.get("heading") or "").lower() == PAGE_BREAK_BEFORE.lower()
         ):
@@ -491,6 +491,8 @@ def build_pdf(resume_data: dict) -> bytes:
             )
 
             for i, entry in enumerate(section.get("entries", [])):
+                if entry.get("page_break_before"):
+                    story.append(PageBreak())
                 story.extend(
                     _entry_header_row(
                         entry,

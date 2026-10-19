@@ -1,29 +1,50 @@
 // Mirrors backend/resume_parser.py so the live preview matches the PDF output.
 // Keep this in sync with the Python parser if you change the markdown format.
 
+// On its own line, starts a new PDF page before the next ### entry or ## section.
+export const PAGE_BREAK_MARKER = "<!-- pagebreak -->";
+
+// A marker that is the last non-blank line of a section belongs to the next
+// ## section, not to an entry.
+function popTrailingPageBreak(rawLines) {
+	while (rawLines.length && !rawLines[rawLines.length - 1].trim()) {
+		rawLines.pop();
+	}
+	if (
+		rawLines.length &&
+		rawLines[rawLines.length - 1].trim() === PAGE_BREAK_MARKER
+	) {
+		rawLines.pop();
+		return true;
+	}
+	return false;
+}
+
 export function parseResumeMarkdown(markdownText) {
 	const lines = (markdownText || "").replace(/\r\n/g, "\n").split("\n");
 
 	let name = "";
 	const contactLines = [];
 	const sections = [];
-	let current = null; // { heading, rawLines: [] }
+	let current = null; // { heading, rawLines: [], pageBreakBefore }
+	let pendingPageBreak = false; // marker seen right before the next "## "
 
 	const finalizeSection = (section) => {
 		const { heading, rawLines } = section;
+		const base = { heading, pageBreakBefore: !!section.pageBreakBefore };
 		const entries = extractEntries(rawLines);
 		if (entries.length) {
-			return { heading, type: "entries", entries };
+			return { ...base, type: "entries", entries };
 		}
 		const listItems = extractListItems(rawLines);
 		if (listItems.length) {
-			return { heading, type: "list", items: listItems };
+			return { ...base, type: "list", items: listItems };
 		}
 		const content = rawLines
 			.map((l) => l.trim())
-			.filter(Boolean)
+			.filter((l) => l && l !== PAGE_BREAK_MARKER)
 			.join(" ");
-		return { heading, type: "text", content };
+		return { ...base, type: "text", content };
 	};
 
 	for (const rawLine of lines) {
@@ -36,8 +57,21 @@ export function parseResumeMarkdown(markdownText) {
 		}
 
 		if (stripped.startsWith("## ")) {
-			if (current !== null) sections.push(finalizeSection(current));
-			current = { heading: stripped.slice(3).trim(), rawLines: [] };
+			if (current !== null) {
+				pendingPageBreak = popTrailingPageBreak(current.rawLines);
+				sections.push(finalizeSection(current));
+			}
+			current = {
+				heading: stripped.slice(3).trim(),
+				rawLines: [],
+				pageBreakBefore: pendingPageBreak,
+			};
+			pendingPageBreak = false;
+			continue;
+		}
+
+		if (stripped === PAGE_BREAK_MARKER && current === null) {
+			pendingPageBreak = true;
 			continue;
 		}
 
@@ -64,10 +98,13 @@ export function parseResumeMarkdown(markdownText) {
 function extractEntries(rawLines) {
 	const entries = [];
 	let cur = null;
+	let pendingPageBreak = false;
 
 	for (const line of rawLines) {
 		const stripped = line.trim();
-		if (stripped.startsWith("### ")) {
+		if (stripped === PAGE_BREAK_MARKER) {
+			pendingPageBreak = true;
+		} else if (stripped.startsWith("### ")) {
 			if (cur !== null) entries.push(cur);
 			const headerRaw = stripped.slice(4).trim();
 			cur = {
@@ -75,7 +112,9 @@ function extractEntries(rawLines) {
 				parts: headerRaw.split("|").map((p) => p.trim()),
 				subtitles: [],
 				bullets: [],
+				pageBreakBefore: pendingPageBreak,
 			};
+			pendingPageBreak = false;
 		} else if (stripped.startsWith("- ") || stripped.startsWith("* ")) {
 			if (cur !== null) cur.bullets.push(stripped.slice(2).trim());
 		} else if (stripped && cur !== null) {
