@@ -59,6 +59,17 @@ Open `http://localhost:5173`. The app talks to the backend at
 
 ## 4. Deploy (Render + Netlify)
 
+Production runs as **one backend and two frontends** from this repo:
+
+| Site     | Netlify env            | Dropdown shows                                      |
+| -------- | ---------------------- | --------------------------------------------------- |
+| Public   | `VITE_APP_MODE=public` | Only `PUBLIC_RESUMES` (the sample)                  |
+| Personal | `VITE_APP_MODE=owner`  | Every bundled resume, after entering the access key |
+
+The backend only returns private resumes when the request carries the
+`X-Access-Key` header matching `OWNER_ACCESS_KEY`, so the public site (or
+anyone calling the API directly) can never load them.
+
 **Backend on Render** — `render.yaml` describes the service (New → Blueprint), or
 create a Web Service manually with:
 
@@ -66,14 +77,22 @@ create a Web Service manually with:
 - Build Command: `pip install -r requirements.txt`
 - Start Command: `gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 60`
 - Health Check Path: `/api/health`
-- Env: `PYTHON_VERSION=3.12.7`, `ALLOWED_ORIGINS=https://<your-site>.netlify.app`
+- Env:
+    - `PYTHON_VERSION=3.12.7`
+    - `ALLOWED_ORIGINS=https://<public-site>.netlify.app,https://<personal-site>.netlify.app`
+    - `PUBLIC_RESUMES=sample_resume.md`
+    - `OWNER_ACCESS_KEY=<long random secret>`
 
-**Frontend on Netlify** — `netlify.toml` sets the base directory, build command
-and publish folder. Add one environment variable before the first deploy:
+**Frontend on Netlify** — create two sites from the same repo; `netlify.toml`
+sets the base directory, build command and publish folder for both. Before the
+first deploy, set on each site:
 
 - `VITE_API_BASE=https://<your-service>.onrender.com` (no trailing slash)
+- `VITE_APP_MODE=public` on the public site, `VITE_APP_MODE=owner` on the personal one
 
-Vite bakes `VITE_API_BASE` into the build, so redeploy after changing it.
+Vite bakes `VITE_*` variables into the build, so redeploy after changing them.
+Locally, `python app.py` runs in debug mode and treats you as the owner, so no
+key is needed.
 `ALLOWED_ORIGINS` is comma-separated; add every frontend origin that should be
 able to call the API.
 
