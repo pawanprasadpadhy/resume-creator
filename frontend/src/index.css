@@ -224,6 +224,26 @@ body {
   margin-bottom: 10px;
 }
 
+/* Preview-only hint for a <!-- pagebreak --> marker; the PDF starts a new page here. */
+.page-break {
+  position: relative;
+  border-top: 1px dashed #9ca3af;
+  margin: 14px 0 10px;
+}
+
+.page-break::after {
+  content: "page break";
+  position: absolute;
+  top: -7px;
+  right: 0;
+  padding-left: 6px;
+  background: #fff;
+  color: #9ca3af;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
 .entry-header-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) var(--date-col-width);

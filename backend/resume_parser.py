@@ -19,11 +19,16 @@ Plain paragraph text                       -> rendered as a "text" section
 - List item (used for Skills / Certifications / anything without ### subheadings)
                                             -> rendered as a "list" section
 
+<!-- pagebreak -->  on its own line starts a new PDF page before the next
+### entry or ## section.
+
 Any number of ## sections, in any order, are supported. Section "type" is
 inferred automatically from its content (see _infer_section_type).
 """
 
 import re
+
+PAGE_BREAK_MARKER = "<!-- pagebreak -->"
 
 
 def parse_resume_markdown(markdown_text: str) -> dict:
@@ -34,6 +39,7 @@ def parse_resume_markdown(markdown_text: str) -> dict:
     sections = []
 
     current_section = None  # {"heading": str, "raw_lines": [...]}
+    pending_page_break = False  # marker seen right before the next "## "
 
     for raw_line in lines:
         line = raw_line.rstrip()
@@ -48,8 +54,20 @@ def parse_resume_markdown(markdown_text: str) -> dict:
         if stripped.startswith("## "):
             # Starting a new section
             if current_section is not None:
+                pending_page_break = _pop_trailing_page_break(
+                    current_section["raw_lines"]
+                )
                 sections.append(_finalize_section(current_section))
-            current_section = {"heading": stripped[3:].strip(), "raw_lines": []}
+            current_section = {
+                "heading": stripped[3:].strip(),
+                "raw_lines": [],
+                "page_break_before": pending_page_break,
+            }
+            pending_page_break = False
+            continue
+
+        if stripped == PAGE_BREAK_MARKER and current_section is None:
+            pending_page_break = True
             continue
 
         if current_section is None and not stripped.startswith("#"):
@@ -72,21 +90,38 @@ def parse_resume_markdown(markdown_text: str) -> dict:
     }
 
 
+def _pop_trailing_page_break(raw_lines) -> bool:
+    """A marker that is the last non-blank line of a section belongs to the
+    next ## section, not to an entry."""
+    while raw_lines and not raw_lines[-1].strip():
+        raw_lines.pop()
+    if raw_lines and raw_lines[-1].strip() == PAGE_BREAK_MARKER:
+        raw_lines.pop()
+        return True
+    return False
+
+
 def _finalize_section(section: dict) -> dict:
     heading = section["heading"]
     raw_lines = section["raw_lines"]
+    base = {
+        "heading": heading,
+        "page_break_before": section.get("page_break_before", False),
+    }
 
     entries = _extract_entries(raw_lines)
     if entries:
-        return {"heading": heading, "type": "entries", "entries": entries}
+        return {**base, "type": "entries", "entries": entries}
 
     list_items = _extract_list_items(raw_lines)
     if list_items:
-        return {"heading": heading, "type": "list", "items": list_items}
+        return {**base, "type": "list", "items": list_items}
 
     # Fall back to plain paragraph text
-    content = " ".join(l.strip() for l in raw_lines if l.strip())
-    return {"heading": heading, "type": "text", "content": content}
+    content = " ".join(
+        l.strip() for l in raw_lines if l.strip() and l.strip() != PAGE_BREAK_MARKER
+    )
+    return {**base, "type": "text", "content": content}
 
 
 def _extract_entries(raw_lines):
@@ -94,10 +129,13 @@ def _extract_entries(raw_lines):
     each with a parsed header (title/org/location/dates) and its bullets."""
     entries = []
     current = None
+    pending_page_break = False
 
     for line in raw_lines:
         stripped = line.strip()
-        if stripped.startswith("### "):
+        if stripped == PAGE_BREAK_MARKER:
+            pending_page_break = True
+        elif stripped.startswith("### "):
             if current is not None:
                 entries.append(current)
             header_raw = stripped[4:].strip()
@@ -106,7 +144,9 @@ def _extract_entries(raw_lines):
                 "parts": [p.strip() for p in header_raw.split("|")],
                 "subtitles": [],
                 "bullets": [],
+                "page_break_before": pending_page_break,
             }
+            pending_page_break = False
         elif stripped.startswith("- ") or stripped.startswith("* "):
             if current is not None:
                 current["bullets"].append(stripped[2:].strip())

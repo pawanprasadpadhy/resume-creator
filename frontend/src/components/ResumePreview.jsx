@@ -43,6 +43,10 @@ function EntryHeaderRow({ entry, accentTitle = false }) {
 	);
 }
 
+function PageBreakMarker() {
+	return <div className="page-break" aria-hidden="true" />;
+}
+
 function ListItem({ item }) {
 	return <li dangerouslySetInnerHTML={{ __html: inlineMdToHtml(item) }} />;
 }
@@ -143,6 +147,7 @@ export default function ResumePreview({ markdown }) {
 							key={i}
 							className={`resume-section${sectionBreak ? " resume-section--break" : ""}`}
 						>
+							{section.pageBreakBefore && <PageBreakMarker />}
 							<h2 className="section-heading">
 								{section.heading}
 							</h2>
@@ -151,6 +156,9 @@ export default function ResumePreview({ markdown }) {
 							{section.type === "entries" &&
 								section.entries.map((entry, j) => (
 									<div key={j} className="entry-block">
+										{entry.pageBreakBefore && (
+											<PageBreakMarker />
+										)}
 										<EntryHeaderRow
 											entry={entry}
 											accentTitle={accentProjectTitles}

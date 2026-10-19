@@ -45,6 +45,8 @@ Bangalore | +91-9040501650 | beingpawanprasad@outlook.com
 - Built and maintained CI/CD pipelines for the AutoTag and Rex services using GitHub Actions, automating testing, deployment, and code quality checks while implementing structured logging, comprehensive documentation, and maintainable code to support scalability and seamless handovers.
 - Tested and validated RESTful API endpoints using Postman, building comprehensive test collections for the 'Rex' and 'AutoTag' services to strengthen error handling coverage.
 
+<!-- pagebreak -->
+
 ### Civil Engineer
 
 - **Grasim Industries Pvt. Ltd. | Feb 2022 - Sep 2022**
@@ -62,6 +64,12 @@ Bangalore | +91-9040501650 | beingpawanprasad@outlook.com
 - Built a markdown-based resume editor with a live preview and one-click ATS-friendly PDF export, using a React (Vite) frontend and a Flask backend with ReportLab for server-side PDF generation.
 - Implemented a shared markdown parser on both client and server so the browser preview stays in sync with the generated PDF, including bold/italic formatting, links, and multi-page layout.
 - _Tech Stack: React, Vite, Flask, ReportLab, Python, JavaScript, Markdown._
+
+### Olist E-Commerce Analytics | [GitHub](https://github.com/pawanprasadpadhy/ecommerce-analysis)
+
+- Built a full analytics pipeline on the Olist Brazilian e-commerce dataset.
+- Cleaned and modelled about 100k orders in SQLite, answered 14 business questions with SQL (revenue trends, category Pareto, delivery delay vs reviews, payment mix, cohort retention), then segmented customers with RFM and published the results in Tableau and Power BI.
+- _Tech Stack: Python, Pandas, SQL, SQLite, Tableau, Power BI._
 
 ### Trello Clone Application | [Live Demo](https://trello-clone-ppp.netlify.app/)
 
@@ -83,7 +91,11 @@ Bangalore | +91-9040501650 | beingpawanprasad@outlook.com
 
 - Data Engineering on AWS – Foundations (AWS)
 - Foundations of Prompt Engineering (AWS)
-- Fundamentals of Analytics (AWS)
+- Fundamentals of Data Analytics (AWS)
+- Tableau Basics (upGrad)
+- Certified Summer Course on AutoCAD
+- Certified Summer Course on StaadPRO
+- Vocational Training at Indian Rare Earth's Limited
 
 ## Education
 
@@ -93,7 +105,7 @@ Bangalore | +91-9040501650 | beingpawanprasad@outlook.com
 
 - **Coursework**: Data Structures & Algorithms, Object-Oriented Design, SQL, System Design, Full Stack Development.
 - **Engineering Practices**: Software Design & Documentation, Testing & Debugging, Cross-Functional Collaboration, Multi-Platform Systems (Linux/Unix, AWS, distributed databases).
-- Sustained a 950+ day consistent DSA and coding practice streak, reflecting strong problem-solving discipline and command over core CS fundamentals.
+- Sustained a 1000+ day consistent DSA and coding practice streak, reflecting strong problem-solving discipline and command over core CS fundamentals.
 
 ### National Institute Of Science And Technology, Odisha | 2015 - 2019
 
