@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: resume-creator-api
+    runtime: python
+    rootDir: backend
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 60
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      # Set in the Render dashboard to your Netlify URL, e.g.
+      # https://resume-creator-ppp.netlify.app,http://localhost:5173
+      - key: ALLOWED_ORIGINS
+        sync: false
+      # Private resumes are uploaded as Secret Files (Environment -> Secret
+      # Files), which Render mounts here. backend/public_resumes is public.
+      - key: PRIVATE_RESUMES_DIR
+        value: /etc/secrets
+      # Long random secret that unlocks every resume (the personal site), e.g.
+      # python -c "import secrets; print(secrets.token_urlsafe(32))"
+      - key: OWNER_ACCESS_KEY
+        sync: false

@@ -4,6 +4,7 @@ import {
 	inlineMdToHtml,
 	parseCompanyDetailLine,
 } from "../utils/parseResume";
+import { MinusIcon, PlusIcon } from "./Icons.jsx";
 
 function EntryHeaderRow({ entry, accentTitle = false }) {
 	const parts = (entry.parts || []).filter((p) => p !== "");
@@ -108,13 +109,50 @@ function SubtitleRow({ subtitle, accentCompany }) {
 	);
 }
 
-export default function ResumePreview({ markdown }) {
+const ZOOM_MIN = 50;
+const ZOOM_MAX = 150;
+const ZOOM_STEP = 10;
+
+export default function ResumePreview({ markdown, zoom, onZoomChange }) {
 	const data = useMemo(() => parseResumeMarkdown(markdown), [markdown]);
+	const setZoom = (z) =>
+		onZoomChange(Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, z)));
 
 	return (
-		<div className="preview-pane">
-			<div className="pane-header">Live Preview</div>
-			<div className="resume-paper">
+		<section className="pane preview-pane" aria-label="Live preview">
+			<div className="pane-header">
+				<span className="pane-title">
+					<span className="pane-dot pane-dot--preview" />
+					Live preview
+				</span>
+				<div className="zoom-control" role="group" aria-label="Zoom">
+					<button
+						className="zoom-btn"
+						onClick={() => setZoom(zoom - ZOOM_STEP)}
+						disabled={zoom <= ZOOM_MIN}
+						aria-label="Zoom out"
+					>
+						<MinusIcon size={13} />
+					</button>
+					<button
+						className="zoom-value"
+						onClick={() => setZoom(100)}
+						title="Reset to 100%"
+					>
+						{zoom}%
+					</button>
+					<button
+						className="zoom-btn"
+						onClick={() => setZoom(zoom + ZOOM_STEP)}
+						disabled={zoom >= ZOOM_MAX}
+						aria-label="Zoom in"
+					>
+						<PlusIcon size={13} />
+					</button>
+				</div>
+			</div>
+			<div className="preview-scroll">
+			<div className="resume-paper" style={{ zoom: zoom / 100 }}>
 				{data.name && <h1 className="resume-name">{data.name}</h1>}
 				{data.contactLines?.length > 0 && (
 					<div className="resume-contact">
@@ -214,6 +252,7 @@ export default function ResumePreview({ markdown }) {
 					</p>
 				)}
 			</div>
-		</div>
+			</div>
+		</section>
 	);
 }

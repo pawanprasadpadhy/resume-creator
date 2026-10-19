@@ -172,7 +172,7 @@ if __name__ == "__main__":
     import json
     import sys
 
-    path = sys.argv[1] if len(sys.argv) > 1 else "pawan_resume.md"
+    path = sys.argv[1] if len(sys.argv) > 1 else "public_resumes/sample_resume.md"
     with open(path, "r", encoding="utf-8") as f:
         text = f.read()
     print(json.dumps(parse_resume_markdown(text), indent=2))
