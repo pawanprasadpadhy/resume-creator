@@ -1,7 +1,7 @@
 // Mirrors backend/resume_parser.py so the live preview matches the PDF output.
 // Keep this in sync with the Python parser if you change the markdown format.
 
-// On its own line, starts a new PDF page before the next ### entry or ## section.
+// On its own line, starts a new PDF page before the next bullet, ### entry or ## section.
 export const PAGE_BREAK_MARKER = "<!-- pagebreak -->";
 
 // A marker that is the last non-blank line of a section belongs to the next
@@ -36,9 +36,9 @@ export function parseResumeMarkdown(markdownText) {
 		if (entries.length) {
 			return { ...base, type: "entries", entries };
 		}
-		const listItems = extractListItems(rawLines);
+		const { items: listItems, breaks: itemBreaks } = extractListItems(rawLines);
 		if (listItems.length) {
-			return { ...base, type: "list", items: listItems };
+			return { ...base, type: "list", items: listItems, pageBreakBeforeItems: itemBreaks };
 		}
 		const content = rawLines
 			.map((l) => l.trim())
@@ -113,10 +113,18 @@ function extractEntries(rawLines) {
 				subtitles: [],
 				bullets: [],
 				pageBreakBefore: pendingPageBreak,
+				pageBreakBeforeBullets: [],
 			};
 			pendingPageBreak = false;
 		} else if (stripped.startsWith("- ") || stripped.startsWith("* ")) {
-			if (cur !== null) cur.bullets.push(stripped.slice(2).trim());
+			if (cur !== null) {
+				// A marker applies to the next bullet, or to the next entry if none follows.
+				if (pendingPageBreak) {
+					cur.pageBreakBeforeBullets.push(cur.bullets.length);
+					pendingPageBreak = false;
+				}
+				cur.bullets.push(stripped.slice(2).trim());
+			}
 		} else if (stripped && cur !== null) {
 			cur.subtitles.push(stripped);
 		}
@@ -125,15 +133,22 @@ function extractEntries(rawLines) {
 	return entries;
 }
 
+// Returns { items, breaks } where breaks are indices of items preceded by a marker.
 function extractListItems(rawLines) {
 	const items = [];
+	const breaks = [];
+	let pendingPageBreak = false;
 	for (const line of rawLines) {
 		const stripped = line.trim();
-		if (stripped.startsWith("- ") || stripped.startsWith("* ")) {
+		if (stripped === PAGE_BREAK_MARKER) {
+			pendingPageBreak = true;
+		} else if (stripped.startsWith("- ") || stripped.startsWith("* ")) {
+			if (pendingPageBreak && items.length) breaks.push(items.length);
+			pendingPageBreak = false;
 			items.push(stripped.slice(2).trim());
 		}
 	}
-	return items;
+	return { items, breaks };
 }
 
 // Split "**Company | detail**" into { company, right } for row layout.

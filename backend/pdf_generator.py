@@ -517,7 +517,10 @@ def build_pdf(resume_data: dict) -> bytes:
                                 styles[subtitle_style_key],
                             )
                         )
-                for bullet in entry.get("bullets", []):
+                bullet_breaks = set(entry.get("page_break_before_bullets", []))
+                for b, bullet in enumerate(entry.get("bullets", [])):
+                    if b in bullet_breaks:
+                        story.append(PageBreak())
                     company_bullet = _company_date_bullet_row(
                         bullet,
                         styles,
@@ -532,7 +535,10 @@ def build_pdf(resume_data: dict) -> bytes:
                     story.append(Spacer(1, ENTRY_GAP))
 
         elif sec_type == "list":
-            for item in section.get("items", []):
+            item_breaks = set(section.get("page_break_before_items", []))
+            for i, item in enumerate(section.get("items", [])):
+                if i in item_breaks:
+                    story.append(PageBreak())
                 story.append(_list_item_paragraph(item, styles, content_width))
 
         elif sec_type == "text":
