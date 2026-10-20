@@ -20,7 +20,7 @@ Plain paragraph text                       -> rendered as a "text" section
                                             -> rendered as a "list" section
 
 <!-- pagebreak -->  on its own line starts a new PDF page before the next
-### entry or ## section.
+bullet, ### entry or ## section.
 
 Any number of ## sections, in any order, are supported. Section "type" is
 inferred automatically from its content (see _infer_section_type).
@@ -113,9 +113,14 @@ def _finalize_section(section: dict) -> dict:
     if entries:
         return {**base, "type": "entries", "entries": entries}
 
-    list_items = _extract_list_items(raw_lines)
+    list_items, item_breaks = _extract_list_items(raw_lines)
     if list_items:
-        return {**base, "type": "list", "items": list_items}
+        return {
+            **base,
+            "type": "list",
+            "items": list_items,
+            "page_break_before_items": item_breaks,
+        }
 
     # Fall back to plain paragraph text
     content = " ".join(
@@ -126,7 +131,9 @@ def _finalize_section(section: dict) -> dict:
 
 def _extract_entries(raw_lines):
     """Sections containing '### ' subheadings become a list of entries,
-    each with a parsed header (title/org/location/dates) and its bullets."""
+    each with a parsed header (title/org/location/dates) and its bullets.
+    A page-break marker applies to whatever comes next: a bullet (recorded in
+    page_break_before_bullets by index) or the next entry."""
     entries = []
     current = None
     pending_page_break = False
@@ -145,10 +152,14 @@ def _extract_entries(raw_lines):
                 "subtitles": [],
                 "bullets": [],
                 "page_break_before": pending_page_break,
+                "page_break_before_bullets": [],
             }
             pending_page_break = False
         elif stripped.startswith("- ") or stripped.startswith("* "):
             if current is not None:
+                if pending_page_break:
+                    current["page_break_before_bullets"].append(len(current["bullets"]))
+                    pending_page_break = False
                 current["bullets"].append(stripped[2:].strip())
         elif stripped and current is not None:
             current["subtitles"].append(stripped)
@@ -160,12 +171,20 @@ def _extract_entries(raw_lines):
 
 
 def _extract_list_items(raw_lines):
+    """Returns (items, indices of items preceded by a page-break marker)."""
     items = []
+    breaks = []
+    pending_page_break = False
     for line in raw_lines:
         stripped = line.strip()
-        if stripped.startswith("- ") or stripped.startswith("* "):
+        if stripped == PAGE_BREAK_MARKER:
+            pending_page_break = True
+        elif stripped.startswith("- ") or stripped.startswith("* "):
+            if pending_page_break and items:
+                breaks.append(len(items))
+            pending_page_break = False
             items.append(stripped[2:].strip())
-    return items
+    return items, breaks
 
 
 if __name__ == "__main__":

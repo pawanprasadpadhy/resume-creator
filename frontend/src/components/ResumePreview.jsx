@@ -141,7 +141,9 @@ function buildBlocks(data) {
 					);
 				});
 				entry.bullets.forEach((bullet, b) => {
-					push(`${k}-b${b}`, <Bullet text={bullet} accent={accentCompanies} />);
+					push(`${k}-b${b}`, <Bullet text={bullet} accent={accentCompanies} />, {
+						breakBefore: entry.pageBreakBeforeBullets?.includes(b),
+					});
 				});
 				if (e < section.entries.length - 1) {
 					blocks.push(spacer(`${k}-gap`, ENTRY_GAP));
@@ -149,7 +151,9 @@ function buildBlocks(data) {
 			});
 		} else if (section.type === "list") {
 			section.items.forEach((item, i) => {
-				push(`s${s}-i${i}`, <Bullet text={item} />);
+				push(`s${s}-i${i}`, <Bullet text={item} />, {
+					breakBefore: section.pageBreakBeforeItems?.includes(i),
+				});
 			});
 		} else if (section.type === "text") {
 			push(
