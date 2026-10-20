@@ -211,7 +211,12 @@ export default function ResumePreview({ markdown, zoom, onZoomChange }) {
 	// 100% = the page fills the pane width (never larger than its real size),
 	// so the whole page is visible without horizontal scrolling.
 	const [fitScale, setFitScale] = useState(1);
-	const [pages, setPages] = useState([]);
+	// Pages hold indices into a block list, so keep each layout together with
+	// the exact blocks it was computed from. After an edit, `blocks` changes a
+	// render before the layout effect re-paginates; rendering from the stored
+	// pair means old indices never point into a shorter, newer list.
+	const [layout, setLayout] = useState({ blocks: [], pages: [] });
+	const { pages } = layout;
 	// Re-measure once web fonts finish loading, since they change line wraps.
 	const [fontEpoch, setFontEpoch] = useState(0);
 
@@ -235,8 +240,7 @@ export default function ResumePreview({ markdown, zoom, onZoomChange }) {
 	useLayoutEffect(() => {
 		const nodes = measureRef.current?.children ?? [];
 		const heightsPt = Array.from(nodes, (n) => n.getBoundingClientRect().height * PT_PER_PX);
-		const next = paginate(blocks, heightsPt);
-		setPages((prev) => (JSON.stringify(prev) === JSON.stringify(next) ? prev : next));
+		setLayout({ blocks, pages: paginate(blocks, heightsPt) });
 	}, [blocks, fontEpoch]);
 
 	const setZoom = (z) => onZoomChange(Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, z)));
@@ -286,7 +290,7 @@ export default function ResumePreview({ markdown, zoom, onZoomChange }) {
 							<div className="pdf-page" key={p}>
 								<div className="pdf-frame">
 									{indices.map((i, pos) => {
-										const block = blocks[i];
+										const block = layout.blocks[i];
 										const before = pos > 0 ? block.spaceBefore : 0;
 										return (
 											<div

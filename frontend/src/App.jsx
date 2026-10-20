@@ -3,6 +3,7 @@ import MarkdownEditor from "./components/MarkdownEditor.jsx";
 import ResumePreview from "./components/ResumePreview.jsx";
 import Toolbar from "./components/Toolbar.jsx";
 import UnlockScreen from "./components/UnlockScreen.jsx";
+import ErrorBoundary from "./components/ErrorBoundary.jsx";
 import { AlertIcon, UploadIcon, XIcon } from "./components/Icons.jsx";
 
 const API_BASE = (import.meta.env.VITE_API_BASE || "http://localhost:5001").replace(/\/+$/, "");
@@ -392,7 +393,19 @@ export default function App() {
 
       <main className={`split-view show-${mobileView}`}>
         <MarkdownEditor value={markdown} onChange={handleMarkdownChange} />
-        <ResumePreview markdown={markdown} zoom={zoom} onZoomChange={setZoom} />
+        <ErrorBoundary
+          resetKey={markdown}
+          fallback={
+            <section className="pane preview-pane">
+              <div className="error-fallback" role="alert">
+                <strong>The preview hit a problem.</strong>
+                <span>Keep editing - it retries on your next change. Download PDF still works.</span>
+              </div>
+            </section>
+          }
+        >
+          <ResumePreview markdown={markdown} zoom={zoom} onZoomChange={setZoom} />
+        </ErrorBoundary>
       </main>
 
       {error && (
