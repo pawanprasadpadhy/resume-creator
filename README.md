@@ -62,9 +62,9 @@ Open `http://localhost:5173`. The app talks to the backend at
 
 Production runs as **one backend and two frontends** from this repo:
 
-| Site     | Netlify env            | Dropdown shows                                      |
-| -------- | ---------------------- | --------------------------------------------------- |
-| Public   | `VITE_APP_MODE=public` | Only `backend/public_resumes/` (the sample)         |
+| Site     | Netlify env            | Dropdown shows                                          |
+| -------- | ---------------------- | ------------------------------------------------------- |
+| Public   | `VITE_APP_MODE=public` | Only `backend/public_resumes/` (the sample)             |
 | Personal | `VITE_APP_MODE=owner`  | Public + private resumes, after entering the access key |
 
 Private resumes are never committed: `backend/private_resumes/` is git-ignored,
@@ -82,10 +82,10 @@ create a Web Service manually with:
 - Start Command: `gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 60`
 - Health Check Path: `/api/health`
 - Env:
-    - `PYTHON_VERSION=3.12.7`
-    - `ALLOWED_ORIGINS=https://<public-site>.netlify.app,https://<personal-site>.netlify.app`
-    - `PRIVATE_RESUMES_DIR=/etc/secrets`
-    - `OWNER_ACCESS_KEY=<long random secret>`
+  - `PYTHON_VERSION=3.12.7`
+  - `ALLOWED_ORIGINS=https://<public-site>.netlify.app,https://<personal-site>.netlify.app`
+  - `PRIVATE_RESUMES_DIR=/etc/secrets`
+  - `OWNER_ACCESS_KEY=<long random secret>`
 
 **Frontend on Netlify** — create two sites from the same repo; `netlify.toml`
 sets the base directory, build command and publish folder for both. Before the
