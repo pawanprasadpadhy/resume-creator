@@ -17,7 +17,12 @@ const SECTION_SPACE_BEFORE = 5;
 const ENTRY_GAP = 11;
 const SECTION_END_GAP = 2;
 const SECTION_BREAK_GAP = 8;
-const SECTION_BREAK_HEADINGS = ["skills", "experience", "projects", "education"];
+const SECTION_BREAK_HEADINGS = [
+	"skills",
+	"experience",
+	"projects",
+	"education",
+];
 
 const PAGE_WIDTH_PX = 8.5 * 96;
 const PAGES_SIDE_PADDING_PX = 32; // .pdf-pages horizontal padding (16px each side)
@@ -39,7 +44,10 @@ function Row({ left, right, leftClass = "", rightClass = "pdf-date" }) {
 	return (
 		<div className="pdf-row">
 			<div className={leftClass} dangerouslySetInnerHTML={html(left)} />
-			<div className={rightClass} dangerouslySetInnerHTML={html(dateText(right))} />
+			<div
+				className={rightClass}
+				dangerouslySetInnerHTML={html(dateText(right))}
+			/>
 		</div>
 	);
 }
@@ -55,10 +63,16 @@ function Bullet({ text, accent = false }) {
 						className={`pdf-text${accent ? " pdf-accent" : ""}`}
 						dangerouslySetInnerHTML={html(detail.company)}
 					/>
-					<div className="pdf-date" dangerouslySetInnerHTML={html(dateText(detail.right))} />
+					<div
+						className="pdf-date"
+						dangerouslySetInnerHTML={html(dateText(detail.right))}
+					/>
 				</>
 			) : (
-				<div className="pdf-text" dangerouslySetInnerHTML={html(text)} />
+				<div
+					className="pdf-text"
+					dangerouslySetInnerHTML={html(text)}
+				/>
 			)}
 		</div>
 	);
@@ -87,7 +101,7 @@ function buildBlocks(data) {
 				dangerouslySetInnerHTML={{
 					__html: data.contactLines.map(inlineMdToHtml).join("<br/>"),
 				}}
-			/>
+			/>,
 		);
 	}
 	blocks.push(spacer("header-space", 2));
@@ -98,10 +112,14 @@ function buildBlocks(data) {
 		const accentTitles = sectionKey === "projects";
 		const accentCompanies = sectionKey === "experience";
 
-		push(`s${s}-heading`, <div className="pdf-heading">{section.heading}</div>, {
-			spaceBefore: SECTION_SPACE_BEFORE,
-			breakBefore: section.pageBreakBefore,
-		});
+		push(
+			`s${s}-heading`,
+			<div className="pdf-heading">{section.heading}</div>,
+			{
+				spaceBefore: SECTION_SPACE_BEFORE,
+				breakBefore: section.pageBreakBefore,
+			},
+		);
 		push(`s${s}-rule`, <div className="pdf-rule" />);
 
 		if (section.type === "entries") {
@@ -120,30 +138,47 @@ function buildBlocks(data) {
 						leftClass={`pdf-title${accentTitles ? " pdf-accent-text" : ""}`}
 						rightClass={`pdf-date${accentTitles ? " pdf-date--link" : ""}`}
 					/>,
-					{ breakBefore: entry.pageBreakBefore }
+					{ breakBefore: entry.pageBreakBefore },
 				);
 				if (middle.length) {
 					push(
 						`${k}-middle`,
-						<div className="pdf-subtitle" dangerouslySetInnerHTML={html(middle.join(", "))} />
+						<div
+							className="pdf-subtitle"
+							dangerouslySetInnerHTML={html(middle.join(", "))}
+						/>,
 					);
 				}
 				entry.subtitles?.forEach((subtitle, t) => {
 					const detail = parseCompanyDetailLine(subtitle);
-					const subtitleClass = accentCompanies ? "pdf-company pdf-accent" : "pdf-subtitle";
+					const subtitleClass = accentCompanies
+						? "pdf-company pdf-accent"
+						: "pdf-subtitle";
 					push(
 						`${k}-sub${t}`,
 						detail ? (
-							<Row left={detail.company} right={detail.right} leftClass={subtitleClass} />
+							<Row
+								left={detail.company}
+								right={detail.right}
+								leftClass={subtitleClass}
+							/>
 						) : (
-							<div className={subtitleClass} dangerouslySetInnerHTML={html(subtitle)} />
-						)
+							<div
+								className={subtitleClass}
+								dangerouslySetInnerHTML={html(subtitle)}
+							/>
+						),
 					);
 				});
 				entry.bullets.forEach((bullet, b) => {
-					push(`${k}-b${b}`, <Bullet text={bullet} accent={accentCompanies} />, {
-						breakBefore: entry.pageBreakBeforeBullets?.includes(b),
-					});
+					push(
+						`${k}-b${b}`,
+						<Bullet text={bullet} accent={accentCompanies} />,
+						{
+							breakBefore:
+								entry.pageBreakBeforeBullets?.includes(b),
+						},
+					);
 				});
 				if (e < section.entries.length - 1) {
 					blocks.push(spacer(`${k}-gap`, ENTRY_GAP));
@@ -158,7 +193,10 @@ function buildBlocks(data) {
 		} else if (section.type === "text") {
 			push(
 				`s${s}-text`,
-				<div className="pdf-text" dangerouslySetInnerHTML={html(section.content)} />
+				<div
+					className="pdf-text"
+					dangerouslySetInnerHTML={html(section.content)}
+				/>,
 			);
 		}
 
@@ -243,11 +281,15 @@ export default function ResumePreview({ markdown, zoom, onZoomChange }) {
 
 	useLayoutEffect(() => {
 		const nodes = measureRef.current?.children ?? [];
-		const heightsPt = Array.from(nodes, (n) => n.getBoundingClientRect().height * PT_PER_PX);
+		const heightsPt = Array.from(
+			nodes,
+			(n) => n.getBoundingClientRect().height * PT_PER_PX,
+		);
 		setLayout({ blocks, pages: paginate(blocks, heightsPt) });
 	}, [blocks, fontEpoch]);
 
-	const setZoom = (z) => onZoomChange(Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, z)));
+	const setZoom = (z) =>
+		onZoomChange(Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, z)));
 	const isEmpty = data.sections.length === 0 && !data.name;
 
 	return (
@@ -258,7 +300,8 @@ export default function ResumePreview({ markdown, zoom, onZoomChange }) {
 					Live preview
 					{!isEmpty && pages.length > 0 && (
 						<span className="pane-meta">
-							· {pages.length} {pages.length === 1 ? "page" : "pages"}
+							· {pages.length}{" "}
+							{pages.length === 1 ? "page" : "pages"}
 						</span>
 					)}
 				</span>
@@ -271,7 +314,11 @@ export default function ResumePreview({ markdown, zoom, onZoomChange }) {
 					>
 						<MinusIcon size={13} />
 					</button>
-					<button className="zoom-value" onClick={() => setZoom(100)} title="Reset to 100%">
+					<button
+						className="zoom-value"
+						onClick={() => setZoom(100)}
+						title="Reset to 100%"
+					>
 						{zoom}%
 					</button>
 					<button
@@ -287,19 +334,31 @@ export default function ResumePreview({ markdown, zoom, onZoomChange }) {
 
 			<div className="preview-scroll" ref={scrollRef}>
 				{isEmpty ? (
-					<p className="preview-empty">Start typing your resume markdown on the left…</p>
+					<p className="preview-empty">
+						Start typing your resume markdown on the left…
+					</p>
 				) : (
-					<div className="pdf-pages" style={{ zoom: (fitScale * zoom) / 100 }}>
+					<div
+						className="pdf-pages"
+						style={{ zoom: (fitScale * zoom) / 100 }}
+					>
 						{pages.map((indices, p) => (
 							<div className="pdf-page" key={p}>
 								<div className="pdf-frame">
 									{indices.map((i, pos) => {
 										const block = layout.blocks[i];
-										const before = pos > 0 ? block.spaceBefore : 0;
+										const before =
+											pos > 0 ? block.spaceBefore : 0;
 										return (
 											<div
 												key={block.key}
-												style={before ? { paddingTop: `${before}pt` } : undefined}
+												style={
+													before
+														? {
+																paddingTop: `${before}pt`,
+															}
+														: undefined
+												}
 											>
 												{block.el}
 											</div>

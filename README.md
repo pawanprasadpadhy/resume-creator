@@ -54,17 +54,19 @@ Open `http://localhost:5173`. The app talks to the backend at
 
 1. Pick a resume from the dropdown, or **Upload** (or drag in) a `.md` file.
 2. Watch the live preview update on the right as you type.
-3. Click **Render / Generate PDF** — the backend parses your markdown,
-   renders it with ReportLab, and downloads `resume.pdf`.
-4. **Export .md** any time to save your raw markdown source.
+3. Click **ATS score** to run a local compatibility check (structure, contact
+   info, sections, metrics) against this app's markdown format.
+4. Click **Download PDF** — the backend parses your markdown, renders it with
+   ReportLab, and downloads `resume.pdf`.
+5. **Export .md** any time to save your raw markdown source.
 
 ## 4. Deploy (Render + Netlify)
 
 Production runs as **one backend and two frontends** from this repo:
 
-| Site     | Netlify env            | Dropdown shows                                      |
-| -------- | ---------------------- | --------------------------------------------------- |
-| Public   | `VITE_APP_MODE=public` | Only `backend/public_resumes/` (the sample)         |
+| Site     | Netlify env            | Dropdown shows                                          |
+| -------- | ---------------------- | ------------------------------------------------------- |
+| Public   | `VITE_APP_MODE=public` | Only `backend/public_resumes/` (the sample)             |
 | Personal | `VITE_APP_MODE=owner`  | Public + private resumes, after entering the access key |
 
 Private resumes are never committed: `backend/private_resumes/` is git-ignored,

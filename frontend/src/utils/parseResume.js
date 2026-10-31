@@ -36,9 +36,15 @@ export function parseResumeMarkdown(markdownText) {
 		if (entries.length) {
 			return { ...base, type: "entries", entries };
 		}
-		const { items: listItems, breaks: itemBreaks } = extractListItems(rawLines);
+		const { items: listItems, breaks: itemBreaks } =
+			extractListItems(rawLines);
 		if (listItems.length) {
-			return { ...base, type: "list", items: listItems, pageBreakBeforeItems: itemBreaks };
+			return {
+				...base,
+				type: "list",
+				items: listItems,
+				pageBreakBeforeItems: itemBreaks,
+			};
 		}
 		const content = rawLines
 			.map((l) => l.trim())
