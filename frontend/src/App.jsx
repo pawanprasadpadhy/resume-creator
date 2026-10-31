@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import MarkdownEditor from "./components/MarkdownEditor.jsx";
 import ResumePreview from "./components/ResumePreview.jsx";
 import Toolbar from "./components/Toolbar.jsx";
+import AtsScoreModal from "./components/AtsScoreModal.jsx";
 import UnlockScreen from "./components/UnlockScreen.jsx";
 import ErrorBoundary from "./components/ErrorBoundary.jsx";
 import { AlertIcon, UploadIcon, XIcon } from "./components/Icons.jsx";
@@ -95,6 +96,7 @@ export default function App() {
 	const [mobileView, setMobileView] = useState("editor");
 	const [isDragging, setIsDragging] = useState(false);
 	const dragDepth = useRef(0);
+	const [atsOpen, setAtsOpen] = useState(false);
 
 	useEffect(() => {
 		document.documentElement.dataset.theme = theme;
@@ -395,6 +397,7 @@ export default function App() {
 				onUploadFile={handleUploadFile}
 				onRemoveUpload={handleRemoveUpload}
 				onExportMarkdown={handleExportMarkdown}
+				onCheckAts={() => setAtsOpen(true)}
 				onGeneratePdf={handleGeneratePdf}
 				isGenerating={isGenerating}
 				theme={theme}
@@ -460,6 +463,12 @@ export default function App() {
 					</button>
 				</div>
 			)}
+
+			<AtsScoreModal
+				markdown={markdown}
+				open={atsOpen}
+				onClose={() => setAtsOpen(false)}
+			/>
 
 			{isDragging && (
 				<div className="drop-overlay" aria-hidden="true">

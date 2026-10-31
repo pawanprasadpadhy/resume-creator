@@ -54,9 +54,11 @@ Open `http://localhost:5173`. The app talks to the backend at
 
 1. Pick a resume from the dropdown, or **Upload** (or drag in) a `.md` file.
 2. Watch the live preview update on the right as you type.
-3. Click **Render / Generate PDF** — the backend parses your markdown,
-   renders it with ReportLab, and downloads `resume.pdf`.
-4. **Export .md** any time to save your raw markdown source.
+3. Click **ATS score** to run a local compatibility check (structure, contact
+   info, sections, metrics) against this app's markdown format.
+4. Click **Download PDF** — the backend parses your markdown, renders it with
+   ReportLab, and downloads `resume.pdf`.
+5. **Export .md** any time to save your raw markdown source.
 
 ## 4. Deploy (Render + Netlify)
 
@@ -82,10 +84,10 @@ create a Web Service manually with:
 - Start Command: `gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 60`
 - Health Check Path: `/api/health`
 - Env:
-  - `PYTHON_VERSION=3.12.7`
-  - `ALLOWED_ORIGINS=https://<public-site>.netlify.app,https://<personal-site>.netlify.app`
-  - `PRIVATE_RESUMES_DIR=/etc/secrets`
-  - `OWNER_ACCESS_KEY=<long random secret>`
+    - `PYTHON_VERSION=3.12.7`
+    - `ALLOWED_ORIGINS=https://<public-site>.netlify.app,https://<personal-site>.netlify.app`
+    - `PRIVATE_RESUMES_DIR=/etc/secrets`
+    - `OWNER_ACCESS_KEY=<long random secret>`
 
 **Frontend on Netlify** — create two sites from the same repo; `netlify.toml`
 sets the base directory, build command and publish folder for both. Before the

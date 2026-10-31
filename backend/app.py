@@ -59,7 +59,7 @@ PUBLIC_RESUMES_DIR = os.path.join(BASE_DIR, "public_resumes")
 PRIVATE_RESUMES_DIR = os.environ.get(
     "PRIVATE_RESUMES_DIR", os.path.join(BASE_DIR, "private_resumes")
 )
-DEFAULT_RESUME_FILE = os.environ.get("DEFAULT_RESUME", "resume_mastercard_da.md")
+DEFAULT_RESUME_FILE = os.environ.get("DEFAULT_RESUME", "pawan_resume_all.md")
 OWNER_ACCESS_KEY = os.environ.get("OWNER_ACCESS_KEY", "")
 
 

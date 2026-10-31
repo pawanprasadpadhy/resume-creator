@@ -10,6 +10,7 @@ import {
 	SunIcon,
 	TrashIcon,
 	UploadIcon,
+	ClipboardCheckIcon,
 } from "./Icons.jsx";
 
 const IS_MAC =
@@ -24,6 +25,7 @@ export default function Toolbar({
 	onUploadFile,
 	onRemoveUpload,
 	onExportMarkdown,
+	onCheckAts,
 	onGeneratePdf,
 	isGenerating,
 	theme,
@@ -118,6 +120,14 @@ export default function Toolbar({
 				>
 					<FileDownIcon size={15} />
 					<span className="btn-label">Export .md</span>
+				</button>
+				<button
+					className="btn btn-ghost"
+					onClick={onCheckAts}
+					title="Check ATS compatibility (structure & content hints)"
+				>
+					<ClipboardCheckIcon size={15} />
+					<span className="btn-label">ATS score</span>
 				</button>
 				<button
 					className="btn btn-icon btn-ghost"
