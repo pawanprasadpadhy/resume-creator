@@ -109,8 +109,9 @@ function buildBlocks(data) {
 
 	data.sections.forEach((section, s) => {
 		const sectionKey = (section.heading || "").toLowerCase();
-		const accentTitles = sectionKey === "projects";
-		const accentCompanies = sectionKey === "experience";
+		const accentTitles =
+			sectionKey.includes("project") || sectionKey.includes("education");
+		const accentCompanies = sectionKey.includes("experience");
 
 		push(
 			`s${s}-heading`,

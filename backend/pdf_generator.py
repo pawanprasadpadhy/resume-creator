@@ -484,8 +484,8 @@ def build_pdf(resume_data: dict) -> bytes:
 
         if sec_type == "entries":
             heading_lower = (section.get("heading") or "").lower()
-            accent_titles = heading_lower == "projects"
-            accent_companies = heading_lower == "experience"
+            accent_titles = "project" in heading_lower or "education" in heading_lower
+            accent_companies = "experience" in heading_lower
             subtitle_style_key = (
                 "entry_subtitle_accent" if accent_companies else "entry_subtitle"
             )
